@@ -1,14 +1,25 @@
-# Don't track environment secrets
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Environment variables
 .env
 
-# Ignore Python cache
-__pycache__/
-*.pyc
+# IDE configs
+.vscode/
+.idea/
 
-# Ignore system/junk files
+# Logs
+*.log
+
+# OS files
 .DS_Store
 Thumbs.db
-
-# Optional: ignore virtual environments
-venv/
-.env/
