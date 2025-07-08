@@ -1,0 +1,14 @@
+# Don't track environment secrets
+.env
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore system/junk files
+.DS_Store
+Thumbs.db
+
+# Optional: ignore virtual environments
+venv/
+.env/
