@@ -24,7 +24,7 @@ def fetch_data(channel_id):
             port=DB_PORT
         )
         query = """
-            SELECT title, view_count, like_count, comment_count, published_at
+            SELECT title, view_count, like_count, comment_count, published_at, channel_title
             FROM video_stats
             WHERE channel_id = %s
             ORDER BY published_at DESC
@@ -39,10 +39,19 @@ def fetch_data(channel_id):
 
 # --- Sidebar Filters ---
 st.sidebar.header(" Filters")
-channel_id = st.sidebar.text_input("Enter YouTube Channel ID", value="UC_x5XG1OV2P6uZZ5FSM9Ttw")
+channel_ids_input = st.sidebar.text_area(
+    "Enter one or more Channel IDs (comma-separated)",
+    value="UC_x5XG1OV2P6uZZ5FSM9Ttw"
+)
 
-if channel_id:
+channel_ids = [cid.strip() for cid in channel_ids_input.split(",") if cid.strip()]
+
+if channel_ids:
+    channel_id = st.sidebar.selectbox("Select a Channel to Analyze", channel_ids)
     df = fetch_data(channel_id)
+
+    if "channel_title" in df.columns and not df.empty:
+        st.markdown(f"### 🎥 Channel: **{df['channel_title'].iloc[0]}**")
 
     if not df.empty:
         df["published_at"] = pd.to_datetime(df["published_at"])
@@ -119,3 +128,5 @@ if channel_id:
 
     else:
         st.warning(" No data found for the provided Channel ID.")
+else:
+    st.warning("Please enter at least one YouTube Channel ID.")

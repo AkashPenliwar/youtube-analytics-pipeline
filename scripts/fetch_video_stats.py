@@ -2,19 +2,29 @@ import requests
 import psycopg2
 
 API_KEY = "AIzaSyDOpKUhkFtn1Ngtn7dxAimVy528NRHCAy0"
-CHANNEL_ID = "UC_x5XG1OV2P6uZZ5FSM9Ttw"  # Google Developers
+CHANNEL_ID = "UC_x5XG1OV2P6uZZ5FSM9Ttw"  # Example channel
 
-# Step 1: Get list of latest videos from the channel
+# ✅ Step 1: Get the channel title
+channel_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet&id={CHANNEL_ID}&key={API_KEY}"
+channel_response = requests.get(channel_url).json()
+
+if "items" not in channel_response or not channel_response["items"]:
+    print(" Could not fetch channel details.")
+    exit()
+
+channel_title = channel_response["items"][0]["snippet"]["title"]
+print(f" Channel Title: {channel_title}")
+
+# Step 2: Fetch videos from the channel
 search_url = f"https://www.googleapis.com/youtube/v3/search?key={API_KEY}&channelId={CHANNEL_ID}&part=snippet,id&order=date&maxResults=10"
-
 search_response = requests.get(search_url)
 search_data = search_response.json()
+
+video_stats = []
 
 if "items" not in search_data:
     print(" No videos found.")
     exit()
-
-video_stats = []
 
 for item in search_data["items"]:
     if item["id"]["kind"] == "youtube#video":
@@ -22,7 +32,6 @@ for item in search_data["items"]:
         video_title = item["snippet"]["title"]
         published_at = item["snippet"]["publishedAt"]
 
-        # Step 2: Get statistics for each video
         stats_url = f"https://www.googleapis.com/youtube/v3/videos?part=statistics&id={video_id}&key={API_KEY}"
         stats_response = requests.get(stats_url)
         stats_data = stats_response.json()
@@ -33,39 +42,42 @@ for item in search_data["items"]:
             like_count = int(stats.get("likeCount", 0))
             comment_count = int(stats.get("commentCount", 0))
 
-            video_stats.append({
+            video_entry = {
                 "video_id": video_id,
                 "channel_id": CHANNEL_ID,
+                "channel_title": channel_title,
                 "title": video_title,
                 "published_at": published_at,
                 "view_count": view_count,
                 "like_count": like_count,
                 "comment_count": comment_count
-            })
-print(" Video data:", video_stats[-1]) 
-print(f" Fetched stats for {len(video_stats)} videos.")
-  
+            }
 
+            # ✅ Print for debugging
+            print("⬇ Inserting video:")
+            print(video_entry)
+            video_stats.append(video_entry)
 
-# Step 3: Insert into PostgreSQL
+# ✅ Step 3: Insert video data into PostgreSQL
 try:
     conn = psycopg2.connect(
         host="localhost",
         port=5432,
         database="youtube_analytics",
         user="postgres",
-        password="Akash1812"  #  Replace with your actual PostgreSQL password
+        password="Akash1812"
     )
     cursor = conn.cursor()
 
     for video in video_stats:
         cursor.execute("""
             INSERT INTO video_stats (
-                video_id, channel_id, title, published_at,
+                video_id, channel_id, channel_title, title, published_at,
                 view_count, like_count, comment_count
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (video_id) DO UPDATE SET
+                channel_title = EXCLUDED.channel_title,
                 title = EXCLUDED.title,
                 published_at = EXCLUDED.published_at,
                 view_count = EXCLUDED.view_count,
@@ -74,6 +86,7 @@ try:
         """, (
             video["video_id"],
             video["channel_id"],
+            video["channel_title"],
             video["title"],
             video["published_at"],
             video["view_count"],
