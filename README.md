@@ -100,25 +100,26 @@ Future Enhancements
 
  Compare two or more channels side-by-side
 
- ## 📸 Dashboard Previews
+## 📸 Dashboard Previews
 
 ### 🔹 1. Channel Selection and Filters
-![Screenshot 1](screenshot1.png)
+![Screenshot 1](Screenshot1.png)
 
 ---
 
 ### 🔹 2. Filtered Video Stats Table
-![Screenshot 2](screenshot2.png)
+![Screenshot 2](Screenshot2.png)
 
 ---
 
 ### 🔹 3. Top 10 Most Viewed Videos (Bar Chart)
-![Screenshot 3](screenshot3.png)
+![Screenshot 3](Screenshot3.png)
 
 ---
 
 ### 🔹 4. Views Over Time + Likes vs Comments (Line & Scatter)
-![Screenshot 4](screenshot4.png)
+![Screenshot 4](Screenshot4.png)
+
 
 
  Deploy on cloud (e.g., Streamlit Cloud or Render)
